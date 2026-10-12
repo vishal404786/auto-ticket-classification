@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>School IT Help Desk</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--tx:#1b2433;--mut:#667085;--bd:#dfe3ec;--ac:#2563eb;--ac2:#1e40af;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1420;--card:#171e2e;--tx:#e8ecf5;--mut:#9aa4b8;--bd:#2a3347;--ac:#5b8cff;--ac2:#8aa9ff}}
+:root[data-theme="dark"]{--bg:#0f1420;--card:#171e2e;--tx:#e8ecf5;--mut:#9aa4b8;--bd:#2a3347;--ac:#5b8cff;--ac2:#8aa9ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--ac);color:#fff;padding:36px 20px;text-align:center}
+header h1{margin:0 0 6px;font-size:1.8rem}header p{margin:0;opacity:.9}
+main{max-width:760px;margin:-24px auto 40px;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:24px;box-shadow:0 6px 20px rgba(0,0,0,.06)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.full{grid-column:1/-1}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+label{display:block;font-size:.85rem;font-weight:600;margin-bottom:4px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--ac);border-color:transparent}
+input[readonly]{color:var(--mut)}
+button{margin-top:20px;background:var(--ac);color:#fff;border:0;border-radius:8px;padding:12px 22px;font:inherit;font-weight:600;cursor:pointer}
+button:hover{background:var(--ac2)}
+#out{margin-top:16px;padding:12px 14px;border-radius:8px;background:var(--bg);border:1px dashed var(--bd);display:none}
+.tip{color:var(--mut);font-size:.8rem;margin-top:3px}
+</style></head><body>
+<header><h1>School IT Help Desk</h1><p>Report an issue and we'll route it to the right team</p></header>
+<main><div class="card"><div class="grid">
+<div><label>Number</label><input id="num" readonly></div>
+<div><label>State</label><select id="state"><option>New</option><option>In progress</option><option>On hold</option><option>Resolved</option><option>Closed</option></select></div>
+<div><label for="caller">Caller</label><input id="caller" placeholder="Your name"></div>
+<div><label for="group">Assigned Group</label><input id="group" placeholder="Auto-filled by flow" readonly></div>
+<div><label for="cat">Category</label><select id="cat"><option value="">-- None --</option></select><div class="tip">Leave empty to auto-classify</div></div>
+<div><label for="sub">Subcategory</label><select id="sub" disabled><option value="">-- None --</option></select></div>
+<div class="full"><label for="short">Short Description</label><input id="short" maxlength="160" placeholder="e.g. Wi-Fi not working in Room 12"></div>
+<div class="full"><label for="desc">Description</label><textarea id="desc" rows="5" maxlength="4000"></textarea></div>
+</div><button id="go">Submit ticket</button><div id="out"></div></div></main>
+<script>
+var map={Network:["Wi-Fi"],Hardware:["Projector"],Access:["Forgot Password"],Performance:["Slow Computer"]};
+var rules=[["Wi-Fi","Network","Wi-Fi"],["Network","Network","Wi-Fi"],["Projector","Hardware","Projector"],["Forgot password","Access","Forgot Password"],["Slow Computer","Performance","Slow Computer"]];
+var $=function(i){return document.getElementById(i)};
+$("num").value="INC"+String(Math.floor(Math.random()*9000000+1000000));
+Object.keys(map).forEach(function(c){$("cat").add(new Option(c,c))});
+function fillSub(c){$("sub").length=1;(map[c]||[]).forEach(function(s){$("sub").add(new Option(s,s))});$("sub").disabled=!c}
+$("cat").onchange=function(){fillSub(this.value)};
+$("go").onclick=function(){
+  var t=$("short").value.toLowerCase(),o=$("out");o.style.display="block";
+  if(!$("cat").value){
+    var r=rules.find(function(x){return t.indexOf(x[0].toLowerCase())>-1});
+    if(r){$("cat").value=r[1];fillSub(r[1]);$("sub").value=r[2];o.textContent="Auto-classified as "+r[1]+" / "+r[2]+"."}
+    else o.textContent="Ticket submitted. No rule matched, so it stays unclassified for manual triage."
+  }else o.textContent="Ticket submitted with category "+$("cat").value+".";
+};
+</script></body></html>
